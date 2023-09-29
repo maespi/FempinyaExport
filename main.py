@@ -1,22 +1,33 @@
 # python -m pip install selenium webdriver-manager
 import json
 import configparser
-from time import sleep
+import csv
 
+from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import NoSuchElementException
+from webdriver_manager.chrome import ChromeDriverManager
 
 config = configparser.ConfigParser()
 config.read("res/Properties.ini")
 user = config['DEFAULT']['user']
 password = config['DEFAULT']['password']
 filename = config['DEFAULT']['filename_data']
+file_out = config['DEFAULT']['filename_out']
+
+
+def toAletaCSV(fulldata):
+    f = open('res/'+file_out, 'w+', newline='')
+    writer = csv.writer(f)
+    writer.writerow(["Sobrenom", "Altura Espatlles", "Altura Espatlles Relativa", "Altura", "Altura Relativa", "Email"])
+    writer.writerows(fulldata)
+    f.close()
 
 
 def getCastellersInfo(ids, driver):
+    castellers = []
     for i in ids:
         url = 'https://app.fempinya.cat/castellers/edit/' + str(i)
         driver.get(url)
@@ -31,8 +42,8 @@ def getCastellersInfo(ids, driver):
                      ).text
         except NoSuchElementException:
             email = ""
-        print(mote + ":\t", alt, "(Altura)\t", alt_rel, "(Altura relativa)\t", espat, "(Espatlla)\t", espat_rel,
-              "(Espatlla relativa)\t", email, "(Email).")
+        castellers.append([mote, espat, espat_rel, alt, alt_rel, email])
+    return castellers
 
 
 def scanCastellersIds():
@@ -67,9 +78,10 @@ def femPinya():
     driver.get(url)
 
     logIn(driver)
-    ids = scanCastellersIds()
-    getCastellersInfo(ids[:2], driver)
-    sleep(5)
+    ids = scanCastellersIds()   #Ids castellers
+    full_info = getCastellersInfo(ids, driver)  #Informació completa castellers
+    toAletaCSV(full_info)   #Convertir a CSV
+    sleep(2)
     driver.quit()
 
 
