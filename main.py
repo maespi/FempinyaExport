@@ -1,5 +1,6 @@
 # python -m pip install selenium webdriver-manager
 import json
+import configparser
 from time import sleep
 
 from selenium import webdriver
@@ -8,9 +9,11 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import NoSuchElementException
 
-user = ""
-password = ""
-filename = "castellers_data.txt"
+config = configparser.ConfigParser()
+config.read("res/Properties.ini")
+user = config['DEFAULT']['user']
+password = config['DEFAULT']['password']
+filename = config['DEFAULT']['filename_data']
 
 
 def getCastellersInfo(ids, driver):
@@ -65,7 +68,7 @@ def femPinya():
 
     logIn(driver)
     ids = scanCastellersIds()
-    getCastellersInfo(ids[:100], driver)
+    getCastellersInfo(ids[:2], driver)
     sleep(5)
     driver.quit()
 
